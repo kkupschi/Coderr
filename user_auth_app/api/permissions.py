@@ -2,7 +2,7 @@ from rest_framework.permissions import BasePermission, SAFE_METHODS
 
 
 class IsProfileOwnerOrReadOnly(BasePermission):
-    """Lesen fuer alle Authentifizierten, Bearbeiten nur fuer den Eigentuemer."""
+    """Bearbeiten nur fuer den Eigentuemer, Lesen fuer alle."""
 
     def has_object_permission(self, request, view, obj):
         if request.method in SAFE_METHODS:

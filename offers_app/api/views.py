@@ -50,7 +50,9 @@ class OfferListCreateView(generics.ListCreateAPIView):
         if min_price:
             queryset = queryset.filter(min_price__gte=min_price)
         if max_delivery_time:
-            queryset = queryset.filter(min_delivery_time__lte=max_delivery_time)
+            queryset = queryset.filter(
+                min_delivery_time__lte=max_delivery_time
+            )
         return queryset
 
 

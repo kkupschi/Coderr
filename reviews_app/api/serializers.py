@@ -4,7 +4,7 @@ from reviews_app.models import Review
 
 
 class ReviewSerializer(serializers.ModelSerializer):
-    """Lesen und Erstellen einer Bewertung (max. eine pro Business/Reviewer)."""
+    """Bewertung lesen/erstellen (max. eine pro Business/Reviewer)."""
 
     class Meta:
         model = Review

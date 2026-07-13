@@ -99,7 +99,9 @@ class BusinessProfileSerializer(serializers.ModelSerializer):
 
     user = serializers.IntegerField(source='user.id', read_only=True)
     username = serializers.CharField(source='user.username', read_only=True)
-    first_name = serializers.CharField(source='user.first_name', read_only=True)
+    first_name = serializers.CharField(
+        source='user.first_name', read_only=True
+    )
     last_name = serializers.CharField(source='user.last_name', read_only=True)
 
     class Meta:
@@ -115,9 +117,13 @@ class CustomerProfileSerializer(serializers.ModelSerializer):
 
     user = serializers.IntegerField(source='user.id', read_only=True)
     username = serializers.CharField(source='user.username', read_only=True)
-    first_name = serializers.CharField(source='user.first_name', read_only=True)
+    first_name = serializers.CharField(
+        source='user.first_name', read_only=True
+    )
     last_name = serializers.CharField(source='user.last_name', read_only=True)
-    uploaded_at = serializers.DateTimeField(source='created_at', read_only=True)
+    uploaded_at = serializers.DateTimeField(
+        source='created_at', read_only=True
+    )
 
     class Meta:
         model = UserProfile
