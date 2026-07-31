@@ -9,7 +9,7 @@ from user_auth_app.models import UserProfile
 
 
 class BaseInfoView(APIView):
-    """Allgemeine Plattform-Statistiken (oeffentlich)."""
+    """General platform statistics (public)."""
 
     permission_classes = [AllowAny]
 

@@ -2,7 +2,7 @@ from rest_framework.permissions import BasePermission
 
 
 class IsCustomerUser(BasePermission):
-    """Erlaubt das Erstellen nur fuer User mit Customer-Profil."""
+    """Allow creating only for users with a customer profile."""
 
     def has_permission(self, request, view):
         profile = getattr(request.user, 'profile', None)
@@ -10,7 +10,7 @@ class IsCustomerUser(BasePermission):
 
 
 class IsReviewOwner(BasePermission):
-    """Erlaubt Bearbeiten/Loeschen nur dem Ersteller der Bewertung."""
+    """Allow updating/deleting only for the creator of the review."""
 
     def has_object_permission(self, request, view, obj):
         return obj.reviewer == request.user

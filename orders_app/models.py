@@ -3,7 +3,7 @@ from django.db import models
 
 
 class Order(models.Model):
-    """Eine Bestellung als Snapshot eines gewaehlten Angebot-Detailpakets."""
+    """An order as a snapshot of a chosen offer detail package."""
 
     STATUS_CHOICES = (
         ('in_progress', 'In Progress'),

@@ -2,7 +2,7 @@ from rest_framework.permissions import BasePermission
 
 
 class IsBusinessUser(BasePermission):
-    """Erlaubt Zugriff nur fuer User mit Business-Profil."""
+    """Allow access only to users with a business profile."""
 
     def has_permission(self, request, view):
         profile = getattr(request.user, 'profile', None)
@@ -10,7 +10,7 @@ class IsBusinessUser(BasePermission):
 
 
 class IsOfferOwner(BasePermission):
-    """Erlaubt Bearbeiten/Loeschen nur dem Ersteller des Angebots."""
+    """Allow updating/deleting only for the creator of the offer."""
 
     def has_object_permission(self, request, view, obj):
         return obj.user == request.user

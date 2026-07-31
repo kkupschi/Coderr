@@ -3,7 +3,7 @@ from django.db import models
 
 
 class UserProfile(models.Model):
-    """Zusatzdaten zu einem User (Kunde oder Geschaeftspartner)."""
+    """Additional data for a user (customer or business partner)."""
 
     TYPE_CHOICES = (
         ('customer', 'Customer'),

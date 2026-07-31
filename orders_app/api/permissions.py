@@ -2,7 +2,7 @@ from rest_framework.permissions import BasePermission
 
 
 class IsCustomerUser(BasePermission):
-    """Erlaubt Zugriff nur fuer User mit Customer-Profil."""
+    """Allow access only to users with a customer profile."""
 
     def has_permission(self, request, view):
         profile = getattr(request.user, 'profile', None)
@@ -10,7 +10,7 @@ class IsCustomerUser(BasePermission):
 
 
 class IsOrderBusinessUser(BasePermission):
-    """Erlaubt das Aktualisieren nur dem Business-User der Bestellung."""
+    """Allow updating only for the business user of the order."""
 
     def has_object_permission(self, request, view, obj):
         return obj.business_user == request.user

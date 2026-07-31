@@ -4,7 +4,7 @@ from orders_app.models import Order
 
 
 class OrderSerializer(serializers.ModelSerializer):
-    """Vollstaendige Darstellung einer Bestellung."""
+    """Full representation of an order."""
 
     class Meta:
         model = Order
@@ -16,7 +16,7 @@ class OrderSerializer(serializers.ModelSerializer):
 
 
 class OrderStatusSerializer(serializers.ModelSerializer):
-    """Aktualisiert nur den Status und gibt die volle Bestellung zurueck."""
+    """Update the status only and return the full order."""
 
     class Meta:
         model = Order

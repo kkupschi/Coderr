@@ -6,7 +6,7 @@ from user_auth_app.models import UserProfile
 
 
 class RegistrationSerializer(serializers.ModelSerializer):
-    """Validiert die Registrierungsdaten und legt User + UserProfile an."""
+    """Validate the registration data and create user plus user profile."""
 
     repeated_password = serializers.CharField(write_only=True)
     type = serializers.ChoiceField(
@@ -43,7 +43,7 @@ class RegistrationSerializer(serializers.ModelSerializer):
 
 
 class LoginSerializer(serializers.Serializer):
-    """Prueft username + password und legt den User in validated_data ab."""
+    """Check username and password, storing the user in validated_data."""
 
     username = serializers.CharField()
     password = serializers.CharField(write_only=True)
@@ -59,7 +59,7 @@ class LoginSerializer(serializers.Serializer):
 
 
 class ProfileSerializer(serializers.ModelSerializer):
-    """Detailprofil eines Users mit Lese- und Bearbeitungsfeldern."""
+    """Detailed user profile with readable and editable fields."""
 
     user = serializers.IntegerField(source='user.id', read_only=True)
     username = serializers.CharField(source='user.username', read_only=True)
@@ -95,7 +95,7 @@ class ProfileSerializer(serializers.ModelSerializer):
 
 
 class BusinessProfileSerializer(serializers.ModelSerializer):
-    """Listendarstellung eines Business-Profils."""
+    """List representation of a business profile."""
 
     user = serializers.IntegerField(source='user.id', read_only=True)
     username = serializers.CharField(source='user.username', read_only=True)
@@ -113,7 +113,7 @@ class BusinessProfileSerializer(serializers.ModelSerializer):
 
 
 class CustomerProfileSerializer(serializers.ModelSerializer):
-    """Listendarstellung eines Customer-Profils."""
+    """List representation of a customer profile."""
 
     user = serializers.IntegerField(source='user.id', read_only=True)
     username = serializers.CharField(source='user.username', read_only=True)

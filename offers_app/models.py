@@ -3,7 +3,7 @@ from django.db import models
 
 
 class Offer(models.Model):
-    """Ein Angebot eines Business-Users mit mehreren Detailpaketen."""
+    """An offer of a business user with several detail packages."""
 
     user = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name='offers'
@@ -22,7 +22,7 @@ class Offer(models.Model):
 
 
 class OfferDetail(models.Model):
-    """Ein Detailpaket (basic/standard/premium) eines Angebots."""
+    """A detail package (basic/standard/premium) of an offer."""
 
     OFFER_TYPE_CHOICES = (
         ('basic', 'Basic'),
