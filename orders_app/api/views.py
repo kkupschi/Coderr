@@ -5,30 +5,18 @@ from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from core.validators import parse_int
 from offers_app.models import OfferDetail
 from orders_app.models import Order
 from user_auth_app.models import UserProfile
 
 from .permissions import IsCustomerUser, IsOrderBusinessUser
 from .serializers import OrderSerializer, OrderStatusSerializer
-
-
-def create_order_from_detail(offer_detail, customer):
-    """Legt eine Bestellung als Snapshot des gewaehlten Detailpakets an."""
-    return Order.objects.create(
-        customer_user=customer,
-        business_user=offer_detail.offer.user,
-        title=offer_detail.title,
-        revisions=offer_detail.revisions,
-        delivery_time_in_days=offer_detail.delivery_time_in_days,
-        price=offer_detail.price,
-        features=offer_detail.features,
-        offer_type=offer_detail.offer_type,
-    )
+from .utils import create_order_from_detail
 
 
 class OrderListCreateView(generics.ListCreateAPIView):
-    """Listet die eigenen Bestellungen oder erstellt eine neue."""
+    """List the user's own orders or create a new one."""
 
     serializer_class = OrderSerializer
 
@@ -50,7 +38,9 @@ class OrderListCreateView(generics.ListCreateAPIView):
                 {'offer_detail_id': 'This field is required.'},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        offer_detail = get_object_or_404(OfferDetail, id=offer_detail_id)
+        offer_detail = get_object_or_404(
+            OfferDetail, id=parse_int(offer_detail_id, 'offer_detail_id')
+        )
         order = create_order_from_detail(offer_detail, request.user)
         return Response(
             OrderSerializer(order).data, status=status.HTTP_201_CREATED
@@ -58,7 +48,7 @@ class OrderListCreateView(generics.ListCreateAPIView):
 
 
 class OrderDetailView(generics.RetrieveUpdateDestroyAPIView):
-    """Liest, aktualisiert den Status oder loescht eine Bestellung."""
+    """Retrieve, update the status of, or delete an order."""
 
     queryset = Order.objects.all()
 
@@ -76,7 +66,7 @@ class OrderDetailView(generics.RetrieveUpdateDestroyAPIView):
 
 
 class OrderCountView(APIView):
-    """Anzahl der laufenden Bestellungen eines Business-Users."""
+    """Number of running orders of a business user."""
 
     def get(self, request, business_user_id):
         get_object_or_404(
@@ -89,7 +79,7 @@ class OrderCountView(APIView):
 
 
 class CompletedOrderCountView(APIView):
-    """Anzahl der abgeschlossenen Bestellungen eines Business-Users."""
+    """Number of completed orders of a business user."""
 
     def get(self, request, business_user_id):
         get_object_or_404(
