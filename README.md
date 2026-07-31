@@ -6,35 +6,32 @@ contains the backend only; the frontend is a separate project.
 
 ## Tech Stack
 
-- Python 3.14
+- Python 3.14 (developed with), 3.12 or newer required
 - Django 6.0
 - Django REST Framework 3.17 (Token Authentication)
 - django-cors-headers
+- python-dotenv (environment variables)
 - Pillow (profile image uploads)
 - SQLite (default development database)
-
-## Requirements
-
-- Python 3.12 or newer installed and available on your PATH.
 
 ## Setup
 
 1. Clone the repository and enter the project folder:
 
    ```
-   git clone <repository-url>
-   cd Backend
+   git clone https://github.com/kkupschi/Coderr.git
+   cd Coderr
    ```
 
 2. Create and activate a virtual environment:
 
    ```
-   python -m venv env
+   python -m venv .venv
    ```
 
-   - Windows (PowerShell): `env\Scripts\Activate.ps1`
-   - Windows (cmd): `env\Scripts\activate.bat`
-   - macOS / Linux: `source env/bin/activate`
+   - Windows (PowerShell): `.venv\Scripts\Activate.ps1`
+   - Windows (cmd): `.venv\Scripts\activate.bat`
+   - macOS / Linux: `source .venv/bin/activate`
 
 3. Install the dependencies:
 
@@ -42,19 +39,32 @@ contains the backend only; the frontend is a separate project.
    pip install -r requirements.txt
    ```
 
-4. Apply the database migrations:
+4. Create your environment file. Copy the template and fill in the values:
+
+   - Windows (PowerShell): `Copy-Item .env.template .env`
+   - macOS / Linux: `cp .env.template .env`
+
+   Then generate a secret key and paste it into `.env` as `SECRET_KEY`:
+
+   ```
+   python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
+   ```
+
+   See [Environment Variables](#environment-variables) for all available keys.
+
+5. Apply the database migrations:
 
    ```
    python manage.py migrate
    ```
 
-5. (Optional) Create an admin account for the Django admin panel:
+6. (Optional) Create an admin account for the Django admin panel:
 
    ```
    python manage.py createsuperuser
    ```
 
-6. Start the development server:
+7. Start the development server:
 
    ```
    python manage.py runserver
@@ -62,6 +72,18 @@ contains the backend only; the frontend is a separate project.
 
 The API is now available at `http://127.0.0.1:8000/api/` and the admin panel at
 `http://127.0.0.1:8000/admin/`.
+
+## Environment Variables
+
+All secrets live in a `.env` file in the project root. This file is excluded
+from version control; `.env.template` documents the expected keys and is the
+file you copy from.
+
+| Variable | Required | Default | Description |
+| --- | --- | --- | --- |
+| `SECRET_KEY` | yes | none | Django secret key. The app refuses to start without it. |
+| `DEBUG` | no | `False` | Set to `True` for local development only. |
+| `ALLOWED_HOSTS` | no | empty | Comma-separated host list, for example `example.com,www.example.com`. |
 
 ## Frontend Connection (CORS)
 
@@ -100,16 +122,27 @@ Base path: `/api/`
 | PATCH / DELETE | `reviews/<id>/` | Update or delete a review |
 | GET | `base-info/` | Platform statistics |
 
+### Query Parameters
+
+`offers/` accepts `creator_id`, `min_price` and `max_delivery_time` as filters,
+`search` for title and description, and `ordering` for `updated_at` or
+`min_price`. `reviews/` accepts `business_user_id` and `reviewer_id` as filters
+and `ordering` for `updated_at` or `rating`. Invalid values return `400`.
+
 ## Project Structure
 
 ```
 Backend/
-├── core/              Project configuration (settings, root URLs)
+├── core/              Project configuration (settings, root URLs, validators)
 ├── user_auth_app/     Registration, login and profiles
 ├── offers_app/        Offers and offer details
 ├── orders_app/        Orders and order statistics
 ├── reviews_app/       Reviews
 ├── base_info_app/     Aggregated platform statistics
+├── .env.template      Template for the required environment variables
 ├── manage.py
 └── requirements.txt
 ```
+
+Each app follows the same layout: an `api/` package holding `views.py`,
+`serializers.py`, `permissions.py` and `utils.py`, with the models at app level.
