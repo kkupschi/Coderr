@@ -2,6 +2,7 @@ from django.db.models import Min
 from rest_framework import filters, generics
 from rest_framework.permissions import AllowAny, IsAuthenticated
 
+from core.validators import parse_decimal, parse_int
 from offers_app.models import Offer, OfferDetail
 
 from .pagination import OfferPagination
@@ -16,7 +17,7 @@ from .serializers import (
 
 
 class OfferListCreateView(generics.ListCreateAPIView):
-    """Listet Angebote (gefiltert/sortiert) oder erstellt ein neues."""
+    """List offers (filtered/ordered) or create a new one."""
 
     pagination_class = OfferPagination
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
@@ -41,23 +42,30 @@ class OfferListCreateView(generics.ListCreateAPIView):
         return self._apply_filters(queryset)
 
     def _apply_filters(self, queryset):
+        """Apply the optional query parameters, rejecting invalid values."""
         params = self.request.query_params
         creator_id = params.get('creator_id')
         min_price = params.get('min_price')
         max_delivery_time = params.get('max_delivery_time')
         if creator_id:
-            queryset = queryset.filter(user_id=creator_id)
+            queryset = queryset.filter(
+                user_id=parse_int(creator_id, 'creator_id')
+            )
         if min_price:
-            queryset = queryset.filter(min_price__gte=min_price)
+            queryset = queryset.filter(
+                min_price__gte=parse_decimal(min_price, 'min_price')
+            )
         if max_delivery_time:
             queryset = queryset.filter(
-                min_delivery_time__lte=max_delivery_time
+                min_delivery_time__lte=parse_int(
+                    max_delivery_time, 'max_delivery_time'
+                )
             )
         return queryset
 
 
 class OfferDetailView(generics.RetrieveUpdateDestroyAPIView):
-    """Liest, aktualisiert oder loescht ein einzelnes Angebot."""
+    """Retrieve, update or delete a single offer."""
 
     queryset = Offer.objects.all()
 
@@ -73,7 +81,7 @@ class OfferDetailView(generics.RetrieveUpdateDestroyAPIView):
 
 
 class OfferDetailSingleView(generics.RetrieveAPIView):
-    """Liest ein einzelnes Detailpaket."""
+    """Retrieve a single detail package."""
 
     queryset = OfferDetail.objects.all()
     serializer_class = OfferDetailSerializer
