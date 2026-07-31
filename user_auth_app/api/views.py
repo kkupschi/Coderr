@@ -1,5 +1,4 @@
 from rest_framework import generics, status
-from rest_framework.authtoken.models import Token
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -14,21 +13,11 @@ from .serializers import (
     ProfileSerializer,
     RegistrationSerializer,
 )
-
-
-def build_auth_response(user):
-    """Baut die einheitliche Auth-Antwort mit Token und User-Daten."""
-    token, _ = Token.objects.get_or_create(user=user)
-    return {
-        'token': token.key,
-        'username': user.username,
-        'email': user.email,
-        'user_id': user.id,
-    }
+from .utils import build_auth_response
 
 
 class RegistrationView(APIView):
-    """Registriert einen neuen Customer- oder Business-User."""
+    """Register a new customer or business user."""
 
     permission_classes = [AllowAny]
 
@@ -41,7 +30,7 @@ class RegistrationView(APIView):
 
 
 class LoginView(APIView):
-    """Authentifiziert einen User und gibt ein Token zurueck."""
+    """Authenticate a user and return a token."""
 
     permission_classes = [AllowAny]
 
@@ -54,7 +43,7 @@ class LoginView(APIView):
 
 
 class ProfileDetailView(generics.RetrieveUpdateAPIView):
-    """Liest oder aktualisiert das Profil eines Users (pk = User-ID)."""
+    """Retrieve or update a user profile (pk = user id)."""
 
     queryset = UserProfile.objects.all()
     serializer_class = ProfileSerializer
@@ -64,7 +53,7 @@ class ProfileDetailView(generics.RetrieveUpdateAPIView):
 
 
 class BusinessProfileListView(generics.ListAPIView):
-    """Liste aller Business-Profile."""
+    """List all business profiles."""
 
     serializer_class = BusinessProfileSerializer
     permission_classes = [IsAuthenticated]
@@ -74,7 +63,7 @@ class BusinessProfileListView(generics.ListAPIView):
 
 
 class CustomerProfileListView(generics.ListAPIView):
-    """Liste aller Customer-Profile."""
+    """List all customer profiles."""
 
     serializer_class = CustomerProfileSerializer
     permission_classes = [IsAuthenticated]
