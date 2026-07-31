@@ -1,6 +1,7 @@
 from rest_framework import filters, generics
 from rest_framework.permissions import IsAuthenticated
 
+from core.validators import parse_int
 from reviews_app.models import Review
 
 from .permissions import IsCustomerUser, IsReviewOwner
@@ -8,7 +9,7 @@ from .serializers import ReviewSerializer, ReviewUpdateSerializer
 
 
 class ReviewListCreateView(generics.ListCreateAPIView):
-    """Listet Bewertungen (gefiltert/sortiert) oder erstellt eine neue."""
+    """List reviews (filtered/ordered) or create a new one."""
 
     serializer_class = ReviewSerializer
     filter_backends = [filters.OrderingFilter]
@@ -25,9 +26,15 @@ class ReviewListCreateView(generics.ListCreateAPIView):
         business_user_id = params.get('business_user_id')
         reviewer_id = params.get('reviewer_id')
         if business_user_id:
-            queryset = queryset.filter(business_user_id=business_user_id)
+            queryset = queryset.filter(
+                business_user_id=parse_int(
+                    business_user_id, 'business_user_id'
+                )
+            )
         if reviewer_id:
-            queryset = queryset.filter(reviewer_id=reviewer_id)
+            queryset = queryset.filter(
+                reviewer_id=parse_int(reviewer_id, 'reviewer_id')
+            )
         return queryset
 
     def perform_create(self, serializer):
@@ -35,7 +42,7 @@ class ReviewListCreateView(generics.ListCreateAPIView):
 
 
 class ReviewDetailView(generics.RetrieveUpdateDestroyAPIView):
-    """Liest, aktualisiert oder loescht eine einzelne Bewertung."""
+    """Retrieve, update or delete a single review."""
 
     queryset = Review.objects.all()
 
