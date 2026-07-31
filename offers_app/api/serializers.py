@@ -2,19 +2,11 @@ from rest_framework import serializers
 
 from offers_app.models import Offer, OfferDetail
 
-
-def get_min_price(offer):
-    prices = [detail.price for detail in offer.details.all()]
-    return min(prices) if prices else None
-
-
-def get_min_delivery_time(offer):
-    times = [detail.delivery_time_in_days for detail in offer.details.all()]
-    return min(times) if times else None
+from .utils import get_min_delivery_time, get_min_price
 
 
 class OfferDetailLinkSerializer(serializers.ModelSerializer):
-    """Kurzform eines Detailpakets: nur ID und Link."""
+    """Short form of a detail package: id and link only."""
 
     url = serializers.SerializerMethodField()
 
@@ -27,7 +19,7 @@ class OfferDetailLinkSerializer(serializers.ModelSerializer):
 
 
 class OfferDetailSerializer(serializers.ModelSerializer):
-    """Vollstaendiges Detailpaket."""
+    """Full detail package."""
 
     class Meta:
         model = OfferDetail
@@ -38,7 +30,7 @@ class OfferDetailSerializer(serializers.ModelSerializer):
 
 
 class OfferListSerializer(serializers.ModelSerializer):
-    """Angebot in der Listenansicht inkl. Ersteller-Kurzinfos."""
+    """Offer in list view including short creator info."""
 
     details = OfferDetailLinkSerializer(many=True, read_only=True)
     min_price = serializers.SerializerMethodField()
@@ -68,7 +60,7 @@ class OfferListSerializer(serializers.ModelSerializer):
 
 
 class OfferRetrieveSerializer(serializers.ModelSerializer):
-    """Angebot in der Detailansicht (ohne user_details)."""
+    """Offer in detail view (without user_details)."""
 
     details = OfferDetailLinkSerializer(many=True, read_only=True)
     min_price = serializers.SerializerMethodField()
@@ -89,7 +81,7 @@ class OfferRetrieveSerializer(serializers.ModelSerializer):
 
 
 class OfferWriteResponseSerializer(serializers.ModelSerializer):
-    """Antwortformat nach Erstellen/Aktualisieren: volle Detailpakete."""
+    """Response format after create/update: full detail packages."""
 
     details = OfferDetailSerializer(many=True, read_only=True)
 
@@ -99,7 +91,7 @@ class OfferWriteResponseSerializer(serializers.ModelSerializer):
 
 
 class OfferCreateSerializer(serializers.ModelSerializer):
-    """Erstellt ein Angebot mit genau drei Detailpaketen."""
+    """Create an offer with exactly three detail packages."""
 
     details = OfferDetailSerializer(many=True)
 
@@ -128,7 +120,7 @@ class OfferCreateSerializer(serializers.ModelSerializer):
 
 
 class OfferDetailUpdateSerializer(serializers.ModelSerializer):
-    """Detailpaket beim Aktualisieren: offer_type identifiziert das Paket."""
+    """Detail package on update: offer_type identifies the package."""
 
     class Meta:
         model = OfferDetail
@@ -147,13 +139,39 @@ class OfferDetailUpdateSerializer(serializers.ModelSerializer):
 
 
 class OfferUpdateSerializer(serializers.ModelSerializer):
-    """Aktualisiert ein Angebot und einzelne Detailpakete per offer_type."""
+    """Update an offer and individual detail packages by offer_type."""
 
     details = OfferDetailUpdateSerializer(many=True, required=False)
 
     class Meta:
         model = Offer
         fields = ['id', 'title', 'image', 'description', 'details']
+
+    def validate_details(self, value):
+        """Ensure every entry names an offer_type the offer actually has.
+
+        A PATCH makes the nested serializer partial, which silently drops the
+        required flag on offer_type, so the check has to happen here.
+        """
+        seen = set()
+        for detail_data in value:
+            offer_type = detail_data.get('offer_type')
+            if not offer_type:
+                raise serializers.ValidationError(
+                    'Each detail requires an offer_type.'
+                )
+            if offer_type in seen:
+                raise serializers.ValidationError(
+                    f'Duplicate offer_type "{offer_type}".'
+                )
+            if not self.instance.details.filter(
+                offer_type=offer_type
+            ).exists():
+                raise serializers.ValidationError(
+                    f'This offer has no detail of type "{offer_type}".'
+                )
+            seen.add(offer_type)
+        return value
 
     def update(self, instance, validated_data):
         details_data = validated_data.pop('details', None)
@@ -166,8 +184,9 @@ class OfferUpdateSerializer(serializers.ModelSerializer):
 
     def _update_details(self, offer, details_data):
         for detail_data in details_data:
-            offer_type = detail_data.get('offer_type')
-            detail = offer.details.get(offer_type=offer_type)
+            detail = offer.details.get(
+                offer_type=detail_data['offer_type']
+            )
             for attr, value in detail_data.items():
                 setattr(detail, attr, value)
             detail.save()
